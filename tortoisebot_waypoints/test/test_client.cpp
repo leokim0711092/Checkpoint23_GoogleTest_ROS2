@@ -41,8 +41,8 @@ public:
         "/odom", 1,
         std::bind(&WaypointTest::odom_callback, this, std::placeholders::_1));
 
-    dest_x = -2.0;
-    dest_y = 0.0;
+    dest_x = 0.5;
+    dest_y = 0.5;
     dest_yaw = atan2(dest_y - cur_pos_y, dest_x - cur_pos_x);
     send_goal();
   }
