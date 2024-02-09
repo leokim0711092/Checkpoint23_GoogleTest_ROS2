@@ -146,6 +146,7 @@ private:
 
             feedback->state = _state;
             feedback->position = _position;
+            feedback->yaw = _yaw;
             // send feedback
             goal_handle->publish_feedback(feedback);
 

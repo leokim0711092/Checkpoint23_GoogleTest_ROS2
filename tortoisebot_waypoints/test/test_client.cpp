@@ -56,25 +56,16 @@ public:
 
     float x_error = abs(this->dest_x - this->cur_pos_x);
     float y_error = abs(this->dest_y - this->cur_pos_y);
-    RCLCPP_INFO(node->get_logger(), "X_error is %f", x_error);
-    RCLCPP_INFO(node->get_logger(), "Y_error is %f", y_error);
-
-    if (x_error <= 0.4 && y_error <= 0.4) {
-      return true;
-    }
-
-    return false;
-  }
-
-  bool yaw_test() {
-
-    while (active) {
-      rclcpp::spin_some(node);
-    }
-
     float yaw_error = abs(this->dest_yaw - this->cur_yaw);
 
-    if (yaw_error <= 0.4) {
+    while(x_error == this->dest_x || y_error == this->dest_y ||  yaw_error == this->dest_yaw){
+        RCLCPP_INFO(node->get_logger(), "X_error is %f", x_error);
+        RCLCPP_INFO(node->get_logger(), "Y_error is %f", y_error);
+        RCLCPP_INFO(node->get_logger(), "Yaw_error is %f", yaw_error);
+    }
+
+
+    if (x_error <= 0.4 && y_error <= 0.4 && yaw_error <= 0.4 ) {
       return true;
     }
 
@@ -102,6 +93,7 @@ private:
     this->position = msg->pose.pose.position;
     this->cur_pos_x = this->position.x;
     this->cur_pos_y = this->position.y;
+    RCLCPP_INFO(node->get_logger(), "Odom active");
 
     // yaw
     tf2::Quaternion tf_quaternion;
@@ -150,7 +142,13 @@ private:
 
   void feedback_callback(
       GoalHandleWaypoint::SharedPtr,
-      const std::shared_ptr<const WaypointAction::Feedback> feedback) {}
+      const std::shared_ptr<const WaypointAction::Feedback> feedback) {
+        cur_pos_x = feedback->position.x;
+        cur_pos_y = feedback->position.y;
+        cur_yaw = feedback->yaw;
+
+      
+      }
 
   void result_callback(const GoalHandleWaypoint::WrappedResult &result) {
     active = false;
@@ -158,8 +156,6 @@ private:
 };
 
 TEST_F(WaypointTest, position_gtest) { EXPECT_TRUE(position_test()); }
-
-TEST_F(WaypointTest, position_angle) { EXPECT_TRUE(yaw_test()); }
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
